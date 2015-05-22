@@ -24,12 +24,12 @@ public class Server
 	{
 		try {
 			server = new ServerSocket(5001);
-			System.out.println("Сервер запущен");
+			System.out.println("Server is running");
 			while (true) 
 			{
 				Socket socket = server.accept();
-				System.out.println("локальный порт: " + server.getLocalPort() + " клиент присоединен, порт: " + socket.getPort());
-				// Создаём объект Connection и добавляем его в список
+				System.out.println("local port: " + server.getLocalPort() + " client connected, port: " + socket.getPort());
+				// create object Connection and add to the list
 				Connection con = new Connection(socket);
 				connections.add(con);
 
@@ -42,13 +42,13 @@ public class Server
 		}
 	}
 
-	//Закрывает все потоки всех соединений а также серверный сокет
+	//close all threads all connections and server socket
 	private void closeAll() 
 	{
 		try {
 			server.close();
-			// Перебор всех Connection и вызов метода close() для каждого. Блок
-			// synchronized {} необходим для правильного доступа к одним данным их разных нитей
+			// close all Connections
+			// synchronized {} necessary for proper access to some data of different strings
 			synchronized(connections) {
 				Iterator<Connection> iter = connections.iterator();
 				while(iter.hasNext()) 
@@ -57,7 +57,7 @@ public class Server
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Потоки не были закрыты!");
+			System.err.println("Threads were not closed!");
 		}
 	}
 
@@ -70,12 +70,12 @@ public class Server
 		private String name = "";
 		private String receiver = "";
 	
-		public Connection(Socket socket) //сокет, полученный из server.accept()
+		public Connection(Socket socket) //socket derived from server.accept()
 		{
 			this.socket = socket;
 			try {
-				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));	//входной поток
-				out = new PrintWriter(socket.getOutputStream(), true);		//выходной поток
+				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));	//input stream
+				out = new PrintWriter(socket.getOutputStream(), true);		//output stream
 	
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -86,19 +86,19 @@ public class Server
 		@Override
 		public void run() {
 			try {
-				//запрашиваем имя пользователя и ожидаем от него сообщений
+				//ask for a user name and expect him messages
 				name = in.readLine();
-				// Отправляем всем клиентам сообщение о том, что зашёл новый пользователь
+				// send a message to all clients that went new user
 				synchronized(connections) {
 					Iterator<Connection> iter = connections.iterator();
 					List<String> online = new ArrayList<>();
 					while(iter.hasNext()) 
 					{
 						Connection con = ((Connection) iter.next());
-						con.out.println(name.toUpperCase() + " зашел в чат");
+						con.out.println(name.toUpperCase() + " came into chat");
 						online.add(con.name);
 					}
-					String onlineusers = ("пользователи онлайн: " + online);
+					String onlineusers = ("users online: " + online);
 					out.println(onlineusers);
 				}
 				
@@ -113,7 +113,7 @@ public class Server
 
 					}
 					if(str.equals("exit")) break;
-					// Отправляем всем клиентам очередное сообщение
+					// Send another message to all clients
 					synchronized(connections) 
 					{
 						Iterator<Connection> iter = connections.iterator();
@@ -123,7 +123,7 @@ public class Server
 
 							if (choiseclient.name.equals(message[0])) {
 
-								choiseclient.out.println(name.toUpperCase() + " написал: " + message[1]);
+								choiseclient.out.println(name.toUpperCase() + " wrote: " + message[1]);
 							}
 
 						}
@@ -133,7 +133,7 @@ public class Server
 				{
 					Iterator<Connection> iter = connections.iterator();
 					while(iter.hasNext()) {
-						((Connection) iter.next()).out.println(name.toUpperCase() + " вышел из чата");
+						((Connection) iter.next()).out.println(name.toUpperCase() + " left the chat");
 					}
 				}
 			} catch (IOException e) {
@@ -149,14 +149,14 @@ public class Server
 				in.close();
 				out.close();
 				socket.close();
-				// Если больше не осталось соединений, закрываем всё, что есть и завершаем работу сервера
+				// If there are no more connections, close all there and finish the job server
 				connections.remove(this);
 				if (connections.size() == 0) {
 					Server.this.closeAll();
 					System.exit(0);
 				}
 			} catch (Exception e) {
-				System.err.println("Потоки не были закрыты!");
+				System.err.println("Threads were not closed!");
 			}
 		}
 	}

@@ -22,22 +22,22 @@ public class Client2 {
 		String ip = "127.0.0.1";
 
 		try {
-			// Подключаемся в серверу и получаем потоки(in и out) для передачи сообщений
+			// connect to the server and receive streams (in and out) to send messages
 			socket = new Socket(ip, 5001);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
 
-			System.out.println("клиент подключен к серверу " + socket.getInetAddress() + " на порт " + socket.getLocalPort());
-			System.out.println("для отправки сообщений введите \"ник>сообщение\" ");
+			System.out.println("client connected to the server " + socket.getInetAddress() + " on port " + socket.getLocalPort());
+			System.out.println("to send a message enter \"nickname>message\" ");
 
-			System.out.println("Введите свой ник:");
+			System.out.println("Enter your nickname:");
 			out.println(scan.nextLine());
 
-			// Запускаем вывод всех входящих сообщений в консоль
+			// Run the withdrawal of all incoming messages to the console
 			Resender resend = new Resender();
 			resend.start();
 
-			// Пока пользователь не введёт "exit" отправляем на сервер всё, что введено из консоли
+			// As long as the user has entered "exit" will send to the server all that entered from the console
 			String str = "";
 			while (!str.equals("exit")) {
 				str = scan.nextLine();
@@ -57,7 +57,7 @@ public class Client2 {
 			out.close();
 			socket.close();
 		} catch (Exception e) {
-			System.err.println("Потоки не были закрыты!");
+			System.err.println("Threads were not closed!");
 		}
 	}
 	
@@ -70,7 +70,7 @@ public class Client2 {
 		}
 
 		
-		//Считывает все сообщения от сервера и печатает их в консоль. Останавливается вызовом метода setStop()
+		//Reads all messages from the server and prints them to the console. Stops by calling setStop ()
 	    @Override
 		public void run() {
 			try {
@@ -79,7 +79,7 @@ public class Client2 {
 					System.out.println(str);
 				}
 			} catch (IOException e) {
-				System.err.println("Ошибка при получении сообщения.");
+				System.err.println("Error getting message.");
 				e.printStackTrace();
 			}
 		}
